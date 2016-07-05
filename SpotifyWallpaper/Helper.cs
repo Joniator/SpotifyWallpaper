@@ -12,10 +12,10 @@ namespace SpotifyWallpaper
     internal class Helper : IDisposable
     {
         private readonly Uri _albumArtUri = new Uri(Application.StartupPath + @"\background.bmp");
+        private bool _connected;
         private Uri _defaultBackgroundUri;
         private bool _disposed;
         private SpotifyLocalAPI _spotifyLocalApi;
-        private bool _connected;
 
         public Helper()
         {
@@ -93,13 +93,13 @@ namespace SpotifyWallpaper
             {
                 if (!File.Exists(_albumArtUri.LocalPath)) File.Create(_albumArtUri.LocalPath).Close();
                 using (FileStream fileStream = new FileStream(_albumArtUri.OriginalString, FileMode.Create)) fileStream.Write(albumBytes, 0, albumBytes.Length);
+                Wallpaper.Set(_albumArtUri, Wallpaper.Style.Centered);
             }
             catch
             {
-                goto retry;
+                using (FileStream fileStream = new FileStream(_albumArtUri.OriginalString+".bmp", FileMode.Create)) fileStream.Write(albumBytes, 0, albumBytes.Length);
+                Wallpaper.Set(new Uri(_albumArtUri.AbsolutePath+ ".bmp"), Wallpaper.Style.Centered);
             }
-
-            Wallpaper.Set(_albumArtUri, Wallpaper.Style.Centered);
         }
 
         public void SetDefaultWallpaperPath()
@@ -114,9 +114,9 @@ namespace SpotifyWallpaper
 
         private void SetDefaultWallpaperPath(Uri path)
         {
-                _defaultBackgroundUri = path;
-                Settings.Default.Background = path;
-                Settings.Default.Save();
+            _defaultBackgroundUri = path;
+            Settings.Default.Background = path;
+            Settings.Default.Save();
         }
 
         private Uri GetDefaultWallpaperPath()
