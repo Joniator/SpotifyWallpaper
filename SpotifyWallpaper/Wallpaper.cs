@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -8,6 +9,7 @@ using Microsoft.Win32;
 
 namespace SpotifyWallpaper
 {
+    [DebuggerStepThrough]
     public sealed class Wallpaper
     {
         public enum Style

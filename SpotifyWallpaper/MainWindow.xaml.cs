@@ -20,7 +20,7 @@ namespace SpotifyWallpaper
     {
         private bool _close = false;
         private readonly NotifyIcon _notifyIcon;
-        private Helper _helper = new Helper();
+        private readonly Helper _helper = new Helper();
         
         public MainWindow()
         {
@@ -42,7 +42,12 @@ namespace SpotifyWallpaper
 
         private void SwitcHWindowState(object sender, EventArgs e)
         {
-            if (Visibility == Visibility.Hidden) Visibility = Visibility.Visible;
+            if (Visibility == Visibility.Hidden)
+            {
+                Topmost = true;
+                Topmost = false;
+                Visibility = Visibility.Visible;
+            }
             else Visibility = Visibility.Hidden;
         }
 
@@ -63,6 +68,7 @@ namespace SpotifyWallpaper
         private void CloseButton_OnClick(object sender, RoutedEventArgs e)
         {
             _close = true;
+            _helper.Dispose();
             Close();
         }
     }
