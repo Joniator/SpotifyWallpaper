@@ -33,16 +33,5 @@ namespace SpotifyWallpaper.Properties {
                 this["Background"] = value;
             }
         }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        public global::System.Uri AlbumArt {
-            get {
-                return ((global::System.Uri)(this["AlbumArt"]));
-            }
-            set {
-                this["AlbumArt"] = value;
-            }
-        }
     }
 }

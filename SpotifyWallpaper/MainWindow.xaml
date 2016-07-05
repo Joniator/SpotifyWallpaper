@@ -10,11 +10,15 @@
         Closing="MainWindow_OnClosed"
         ShowInTaskbar="False"
         Background="AliceBlue">
-    <Grid >
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Button Name="CloseButton" Grid.Row="2" Click="CloseButton_OnClick">Close</Button>
+        <Button Name="SetBackgroundButton" Content="Set Default Background" Grid.Row="0"
+                Click="SetBackgroundButton_Click" />
+        <Button Name="RestartButton" Content="Restart" Grid.Row="1" Click="RestartButton_Click" />
+        <Button Name="CloseButton" Content="Close" Grid.Row="2" Click="CloseButton_OnClick" />
     </Grid>
 </Window>

@@ -5,54 +5,50 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SpotifyAPI.Local;
 using SpotifyAPI.Local.Enums;
+using SpotifyWallpaper.Properties;
 
 namespace SpotifyWallpaper
 {
     internal class Helper : IDisposable
     {
-        private SpotifyLocalAPI _spotifyLocalApi;
         private readonly Uri _albumArtUri = new Uri(Application.StartupPath + @"\background.bmp");
-        private Uri _defaultBackgroundUri = new Uri(@"F:\Pictures\Saved Pictures\Hintergrund\Background.png");
-        private bool _disposed = false;
-        public bool Connected = false;
+        private Uri _defaultBackgroundUri;
+        private bool _disposed;
+        private SpotifyLocalAPI _spotifyLocalApi;
+        private bool _connected;
 
         public Helper()
         {
-                Task t = new Task(() =>
-                {
-                    while (!SpotifyLocalAPI.IsSpotifyRunning() && !_disposed) { }
-                    while (!Connected && !_disposed)
-                    {
-                        try
-                        {
-                            _spotifyLocalApi = new SpotifyLocalAPI();
-                            Connected = _spotifyLocalApi.Connect();
-                            _spotifyLocalApi.ListenForEvents = true;
-                            _spotifyLocalApi.OnPlayStateChange += OnPlayStateChange;
-                            _spotifyLocalApi.OnTrackChange += OnTrackChange;
-                            SetAlbumArtWallpaper();
-                        }
-                        catch
-                        {
-                            // ignored
-                        }
-                    }
-                });
+            _defaultBackgroundUri = GetDefaultWallpaperPath();
 
-                t.Start();
-            
+            Task t = new Task(() =>
+            {
+                while (!SpotifyLocalAPI.IsSpotifyRunning() && !_disposed) { }
+                while (!_connected && !_disposed)
+                {
+                    try
+                    {
+                        _spotifyLocalApi = new SpotifyLocalAPI();
+                        _connected = _spotifyLocalApi.Connect();
+                        _spotifyLocalApi.ListenForEvents = true;
+                        _spotifyLocalApi.OnPlayStateChange += OnPlayStateChange;
+                        _spotifyLocalApi.OnTrackChange += OnTrackChange;
+                        SetAlbumArtWallpaper();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+            });
+
+            t.Start();
         }
 
         public bool Running
         {
-            get
-            {
-                return _spotifyLocalApi.ListenForEvents;
-            }
-            set
-            {
-                _spotifyLocalApi.ListenForEvents = value;
-            }
+            get { return _spotifyLocalApi.ListenForEvents; }
+            set { _spotifyLocalApi.ListenForEvents = value; }
         }
 
         public void Dispose()
@@ -104,6 +100,39 @@ namespace SpotifyWallpaper
             }
 
             Wallpaper.Set(_albumArtUri, Wallpaper.Style.Centered);
+        }
+
+        public void SetDefaultWallpaperPath()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = Environment.SpecialFolder.MyPictures.ToString();
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                SetDefaultWallpaperPath(new Uri(openFileDialog.FileName));
+            }
+        }
+
+        private void SetDefaultWallpaperPath(Uri path)
+        {
+                _defaultBackgroundUri = path;
+                Settings.Default.Background = path;
+                Settings.Default.Save();
+        }
+
+        private Uri GetDefaultWallpaperPath()
+        {
+            if (Settings.Default.Background != null)
+            {
+                return Settings.Default.Background;
+            }
+
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = Environment.SpecialFolder.MyPictures.ToString();
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                SetDefaultWallpaperPath(new Uri(openFileDialog.FileName));
+            }
+            return GetDefaultWallpaperPath();
         }
     }
 }

@@ -7,8 +7,5 @@
     <Setting Name="Background" Type="System.Uri" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="AlbumArt" Type="System.Uri" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
   </Settings>
 </SettingsFile>
