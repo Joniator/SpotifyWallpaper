@@ -17,12 +17,14 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="3*" />
         </Grid.RowDefinitions>
         <Button Name="SetBackgroundButton" Content="Set Default Background" Grid.Row="0"
                 Click="SetBackgroundButton_Click" />
         <Button Name="RestartButton" Content="Restart" Grid.Row="1" Click="RestartButton_Click" />
-        <Button Name="CloseButton" Content="Close" Grid.Row="2" Click="CloseButton_OnClick" />
-        <TextBlock Name="ErrorText" Grid.Row="3" />
+        <ToggleButton Name="AutostartButton" Content="Run on windows startup" IsThreeState="False" Grid.Row="2" Click="AutostartButton_Click"/>
+        <Button Name="CloseButton" Content="Close" Grid.Row="3" Click="CloseButton_OnClick" />
+        <TextBlock Name="ErrorText" Grid.Row="4" />
     </Grid>
 </Window>

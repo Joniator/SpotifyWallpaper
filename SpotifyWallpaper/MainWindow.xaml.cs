@@ -2,9 +2,13 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Navigation;
+using Microsoft.Win32;
 
 namespace SpotifyWallpaper
 {
@@ -26,11 +30,13 @@ namespace SpotifyWallpaper
             Icon icon = new Icon(myStream);
 
             _notifyIcon = new NotifyIcon
-                          {
-                              Visible = true,
-                              Icon = icon
-                          };
+            {
+                Visible = true,
+                Icon = icon
+            };
             _notifyIcon.Click += SwitcHWindowState;
+
+            AutostartButton.IsChecked = Autostart();
         }
 
         private void SwitcHWindowState(object sender, EventArgs e)
@@ -85,6 +91,25 @@ namespace SpotifyWallpaper
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             _helper = new Helper(this);
+        }
+
+        private void AutostartButton_Click(object sender, RoutedEventArgs e)
+        {
+            RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+            if (AutostartButton.IsChecked == true)
+            {
+                key.SetValue("SpotifyWallpaper", System.Windows.Application.ResourceAssembly.Location);
+            }
+            else if (AutostartButton.IsChecked == false)
+            {
+                key.DeleteValue("SpotifyWallpaper");
+            }
+        }
+
+        private bool Autostart()
+        {
+            RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+            return key.GetValueNames().Contains("SpotifyWallpaper");
         }
     }
 }
