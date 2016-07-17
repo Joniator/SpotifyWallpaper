@@ -34,9 +34,25 @@ namespace SpotifyWallpaper
                 Visible = true,
                 Icon = icon
             };
-            _notifyIcon.Click += SwitcHWindowState;
+            //_notifyIcon.Click += SwitcHWindowState;
+
+            MenuItem[] menuItems = new MenuItem[2];
+            menuItems[0] = new MenuItem("Open", OpenMenu_OnClick);
+            menuItems[1] = new MenuItem("Close", CloseMenu_OnClick);
+            _notifyIcon.ContextMenu = new ContextMenu(menuItems);
+           
 
             AutostartButton.IsChecked = Autostart();
+        }
+
+        private void CloseMenu_OnClick(object sender, EventArgs e)
+        {
+            CloseButton_OnClick(this, new RoutedEventArgs());
+        }
+
+        private void OpenMenu_OnClick(object sender, EventArgs e)
+        {
+            SwitcHWindowState(this, e);
         }
 
         private void SwitcHWindowState(object sender, EventArgs e)
@@ -52,22 +68,22 @@ namespace SpotifyWallpaper
 
         private void MainWindow_OnClosed(object sender, CancelEventArgs e)
         {
-            if (_close)
-            {
-                _helper.SetDefaultWallpaper();
-                _notifyIcon.Visible = false;
-            }
-            else
-            {
-                Visibility = Visibility.Hidden;
-                e.Cancel = true;
-            }
+            if (_close) return;
+
+            Visibility = Visibility.Hidden;
+            e.Cancel = true;
         }
 
         private void CloseButton_OnClick(object sender, RoutedEventArgs e)
         {
             _close = true;
+
+            _notifyIcon.Visible = false;
+            _notifyIcon.Dispose();
+
+            _helper.SetDefaultWallpaper();
             _helper.Dispose();
+
             Close();
         }
 

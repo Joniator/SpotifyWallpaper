@@ -23,7 +23,9 @@
         <Button Name="SetBackgroundButton" Content="Set Default Background" Grid.Row="0"
                 Click="SetBackgroundButton_Click" />
         <Button Name="RestartButton" Content="Restart" Grid.Row="1" Click="RestartButton_Click" />
-        <ToggleButton Name="AutostartButton" Content="Run on windows startup" IsThreeState="False" Grid.Row="2" Click="AutostartButton_Click"/>
+        <ScrollViewer Grid.Row="2">
+            <ToggleButton Name="AutostartButton" Content="Run on windows startup" IsThreeState="False" Click="AutostartButton_Click" />
+        </ScrollViewer>
         <Button Name="CloseButton" Content="Close" Grid.Row="3" Click="CloseButton_OnClick" />
         <TextBlock Name="ErrorText" Grid.Row="4" />
     </Grid>
