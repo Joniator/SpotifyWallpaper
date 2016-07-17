@@ -1,54 +1,51 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SpotifyAPI.Local;
 using SpotifyAPI.Local.Enums;
+using SpotifyAPI.Local.Models;
 using SpotifyWallpaper.Properties;
 
 namespace SpotifyWallpaper
 {
     internal class Helper : IDisposable
     {
-        private readonly Uri _albumArtUri = new Uri(Application.StartupPath + @"\background.bmp");
         private bool _connected;
         private Uri _defaultBackgroundUri;
-        private bool _disposed;
+        private bool _disposed = false;
         private SpotifyLocalAPI _spotifyLocalApi;
+        private readonly MainWindow _mainWindow;
 
-        public Helper()
+        public Helper(MainWindow window)
         {
+            _mainWindow = window;
+            PrintMessage("Background helper started!");
             _defaultBackgroundUri = GetDefaultWallpaperPath();
-
             Task t = new Task(() =>
             {
-                while (!SpotifyLocalAPI.IsSpotifyRunning() && !_disposed) { }
-                while (!_connected && !_disposed)
+                while (SpotifyLocalAPI.IsSpotifyRunning() && !_connected && !_disposed)
                 {
                     try
                     {
                         _spotifyLocalApi = new SpotifyLocalAPI();
                         _connected = _spotifyLocalApi.Connect();
-                        _spotifyLocalApi.ListenForEvents = true;
-                        _spotifyLocalApi.OnPlayStateChange += OnPlayStateChange;
-                        _spotifyLocalApi.OnTrackChange += OnTrackChange;
-                        SetAlbumArtWallpaper();
+                        PrintMessage("Connected: " + _connected);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        // ignored
+                        PrintMessage(e.Message);
                     }
+                    _spotifyLocalApi.ListenForEvents = true;
+                    _spotifyLocalApi.OnPlayStateChange += OnPlayStateChange;
+                    _spotifyLocalApi.OnTrackChange += OnTrackChange;
+                    SetAlbumArtWallpaper();
                 }
             });
-
             t.Start();
-        }
-
-        public bool Running
-        {
-            get { return _spotifyLocalApi.ListenForEvents; }
-            set { _spotifyLocalApi.ListenForEvents = value; }
         }
 
         public void Dispose()
@@ -60,6 +57,7 @@ namespace SpotifyWallpaper
                 _spotifyLocalApi.OnTrackChange -= OnTrackChange;
                 _spotifyLocalApi.ListenForEvents = false;
             }
+            PrintMessage("Helper disposed!");
         }
 
         private void OnTrackChange(object sender, TrackChangeEventArgs e)
@@ -82,23 +80,39 @@ namespace SpotifyWallpaper
         public void SetDefaultWallpaper()
         {
             Wallpaper.Set(_defaultBackgroundUri, Wallpaper.Style.Centered);
+            PrintMessage("Set default wallpaper!");
         }
 
         private void SetAlbumArtWallpaper()
         {
-            byte[] albumBytes = _spotifyLocalApi.GetStatus().Track.GetAlbumArtAsByteArray(AlbumArtSize.Size640);
-            retry:
-            Thread.Sleep(10);
             try
             {
-                if (!File.Exists(_albumArtUri.LocalPath)) File.Create(_albumArtUri.LocalPath).Close();
-                using (FileStream fileStream = new FileStream(_albumArtUri.OriginalString, FileMode.Create)) fileStream.Write(albumBytes, 0, albumBytes.Length);
-                Wallpaper.Set(_albumArtUri, Wallpaper.Style.Centered);
+                if (!Directory.Exists($"{Environment.CurrentDirectory}\\images")) Directory.CreateDirectory($"{Environment.CurrentDirectory}\\images");
+                while (_spotifyLocalApi.GetStatus() == null) { }
+                Track currentTrack = _spotifyLocalApi.GetStatus().Track;
+                string fileName = $"{currentTrack.ArtistResource.Name} - {currentTrack.AlbumResource.Name}.bmp";
+
+                foreach (char invalidFileNameChar in Path.GetInvalidFileNameChars())
+                {
+                    fileName.Replace(invalidFileNameChar, ' ');
+                }
+
+                Uri wallpaperUri = new Uri($"{Environment.CurrentDirectory}\\images\\" + fileName);
+                
+                if (!File.Exists(wallpaperUri.LocalPath))
+                {
+                    PrintMessage($"Downloading: {fileName}");
+                    byte[] albumBytes = currentTrack.GetAlbumArtAsByteArray(AlbumArtSize.Size640);
+
+                    using (FileStream fileStream = new FileStream(wallpaperUri.LocalPath, FileMode.Create)) fileStream.Write(albumBytes, 0, albumBytes.Length);
+                    PrintMessage($"Saved: {fileName}");
+                }
+                Wallpaper.Set(new Uri(wallpaperUri.LocalPath), Wallpaper.Style.Centered);
+                PrintMessage($"Set wallpaper: {fileName}");
             }
-            catch
+            catch (Exception e)
             {
-                using (FileStream fileStream = new FileStream(_albumArtUri.OriginalString+".bmp", FileMode.Create)) fileStream.Write(albumBytes, 0, albumBytes.Length);
-                Wallpaper.Set(new Uri(_albumArtUri.AbsolutePath+ ".bmp"), Wallpaper.Style.Centered);
+                PrintMessage(e.Message);
             }
         }
 
@@ -133,6 +147,16 @@ namespace SpotifyWallpaper
                 SetDefaultWallpaperPath(new Uri(openFileDialog.FileName));
             }
             return GetDefaultWallpaperPath();
+        }
+
+        private void PrintMessage(string message)
+        {
+            message = $"[{DateTime.Now}] {message}";
+            _mainWindow.Dispatcher.Invoke(() =>
+            {
+                _mainWindow.PrintMessage(message);
+            });
+            Debug.Print(message);
         }
     }
 }

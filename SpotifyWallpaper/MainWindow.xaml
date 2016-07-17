@@ -6,19 +6,23 @@
         xmlns:local="clr-namespace:SpotifyWallpaper"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="MainWindow" Height="100" Width="200"
+        Title="MainWindow" Height="170" Width="450"
         Closing="MainWindow_OnClosed"
         ShowInTaskbar="False"
-        Background="AliceBlue">
+        Background="AliceBlue"
+        Loaded="MainWindow_OnLoaded"
+        Visibility="Hidden">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="3*" />
         </Grid.RowDefinitions>
         <Button Name="SetBackgroundButton" Content="Set Default Background" Grid.Row="0"
                 Click="SetBackgroundButton_Click" />
         <Button Name="RestartButton" Content="Restart" Grid.Row="1" Click="RestartButton_Click" />
         <Button Name="CloseButton" Content="Close" Grid.Row="2" Click="CloseButton_OnClick" />
+        <TextBlock Name="ErrorText" Grid.Row="3" />
     </Grid>
 </Window>

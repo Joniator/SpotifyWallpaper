@@ -15,14 +15,14 @@ namespace SpotifyWallpaper
     {
         private readonly NotifyIcon _notifyIcon;
         private bool _close;
-        private Helper _helper = new Helper();
+        private Helper _helper;
 
         public MainWindow()
         {
             InitializeComponent();
 
             Assembly myAssembly = Assembly.GetExecutingAssembly();
-            Stream myStream = myAssembly.GetManifestResourceStream("SpotifyWallpaper.Sirubico-Movie-Genre-Music.ico");
+            Stream myStream = myAssembly.GetManifestResourceStream("SpotifyWallpaper.TrayIcon.ico");
             Icon icon = new Icon(myStream);
 
             _notifyIcon = new NotifyIcon
@@ -72,8 +72,19 @@ namespace SpotifyWallpaper
 
         private void RestartButton_Click(object sender, RoutedEventArgs e)
         {
+            PrintMessage("Stopping background helper!");
             _helper.Dispose();
-            _helper = new Helper();
+            _helper = new Helper(this);
+        }
+
+        public void PrintMessage(string message)
+        {
+            ErrorText.Text += message + Environment.NewLine;
+        }
+
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            _helper = new Helper(this);
         }
     }
 }
