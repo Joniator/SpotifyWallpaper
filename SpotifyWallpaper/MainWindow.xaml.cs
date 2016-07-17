@@ -81,8 +81,8 @@ namespace SpotifyWallpaper
             _notifyIcon.Visible = false;
             _notifyIcon.Dispose();
 
-            _helper.SetDefaultWallpaper();
-            _helper.Dispose();
+            _helper?.SetDefaultWallpaper();
+            _helper?.Dispose();
 
             Close();
         }
